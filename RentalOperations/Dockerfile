@@ -3,23 +3,23 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 8200
+EXPOSE 8201
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["RentalOperations/RentalOperations.csproj", "RentalOperations/"]
+COPY ["RentalOperations/RentalOperations/RentalOperations.csproj", "RentalOperations/"]
 RUN dotnet restore "./RentalOperations/RentalOperations.csproj"
 COPY . .
 WORKDIR "/src/RentalOperations"
-RUN dotnet build "./RentalOperations.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./RentalOperations/RentalOperations.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./RentalOperations.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./RentalOperations/RentalOperations.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "RentalOperations.dll"]
+#ENTRYPOINT ["dotnet", "RentalOperations.dll"]
